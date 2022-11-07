@@ -19,6 +19,13 @@ public class lineScr : MonoBehaviour
     int dotColor1=5;
     int dotColor2=5;
     int currentColor=0;
+
+    //TEMP
+    [Header("Touch settings")]
+    float startHoldTime;
+    [SerializeField]float holdTime=0.25f;
+    Vector2 mousePosition;
+    GameObject holding=null;
     // Start is called before the first frame update
     void Start()
     {
@@ -27,11 +34,33 @@ public class lineScr : MonoBehaviour
         dot2= GameObject.Find("dot2");
         changeColor(1);
         changeColor(2);
+
+        //TEMP
+        mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
     }
 
     // Update is called once per frame
     void Update()
     {
+        if(Input.GetMouseButtonDown(0))
+        {
+            mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            if(Vector2.Distance(mousePosition,dot1.transform.position)<Vector2.Distance(mousePosition,dot2.transform.position))
+                holding=dot1;
+            else
+                holding=dot2;
+            startHoldTime=Time.time;
+        }
+        if(Input.GetMouseButton(0) && Time.time-startHoldTime>holdTime)
+        {
+            mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            holding.transform.position=mousePosition;
+            //Debug.Log(Time.time-startHoldTime);
+        }
+        else if(Input.GetMouseButtonUp(0) && Time.time-startHoldTime<holdTime)
+        {
+            changeColor(int.Parse(holding.name.Substring(3)));
+        }
         //CHANGE COLOR, MOVE TO ANOTHER SCRIPT
         if(Input.GetKeyDown(KeyCode.Q))
         {
