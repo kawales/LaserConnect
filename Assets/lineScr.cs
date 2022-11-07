@@ -9,17 +9,48 @@ public class lineScr : MonoBehaviour
     GameObject dot1;
     GameObject dot2;
     RaycastHit2D hit;
+    Vector2 dot1Dir;
+    Vector2 dot2Dir;
+    [Header("Dot speed")]
+    public float speed=2f;
+    [Header("Colors")]
+    [SerializeField] Color[] colors;
+    // Set as 5 so they start  red on startup
+    int dotColor1=5;
+    int dotColor2=5;
+    int currentColor=0;
     // Start is called before the first frame update
     void Start()
     {
         line = GetComponent<LineRenderer>();
         dot1= GameObject.Find("dot1");
         dot2= GameObject.Find("dot2");
+        changeColor(1);
+        changeColor(2);
     }
 
     // Update is called once per frame
     void Update()
     {
+        //CHANGE COLOR, MOVE TO ANOTHER SCRIPT
+        if(Input.GetKeyDown(KeyCode.Q))
+        {
+            changeColor();
+        }
+        if(Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.RightShift))
+        {
+            changeColor(2);
+        }
+
+        // Update dot1 position
+        dot1Dir=new Vector2(Input.GetAxis("dot1H"),Input.GetAxis("dot1V")).normalized; // Get direction
+        dot1.transform.Translate(dot1Dir*Time.deltaTime*speed);
+        // Update dot2 position
+        dot2Dir=new Vector2(Input.GetAxis("dot2H"),Input.GetAxis("dot2V")).normalized; // Get direction
+        dot2.transform.Translate(dot2Dir*Time.deltaTime*speed);
+
+
+        // Connect the dots with the line and check the collision between them
         playerPos[0]= dot1.transform.position;
         playerPos[1]= dot2.transform.position;
         line.SetPositions(playerPos);
@@ -28,6 +59,55 @@ public class lineScr : MonoBehaviour
         Debug.DrawRay(dot1.transform.position,dot2.transform.position-dot1.transform.position,Color.red);
         if(hit.collider==null)
             return;
-        Debug.Log(hit.collider.gameObject);
+        if(hit.collider.gameObject.tag=="Enemy")
+        {
+            Debug.Log("LINE HIT:"+hit.collider.gameObject.name+" CURRENT COLOR:"+hit.collider.GetComponent<enemyScr>().enemyColor);
+            if(hit.collider.GetComponent<enemyScr>().enemyColor==currentColor)
+            {
+                Destroy(hit.collider.gameObject);
+                return;
+            }
+        }
+        //Debug.Log("LINE HIT:"+hit.collider.gameObject.name);
+    }
+
+
+    void changeColor(int dotNumber=1)
+    {
+        if(dotNumber==1)
+        {
+            dotColor1+=2;
+            if(dotColor1>colors.Length-1)
+                dotColor1=0;
+            dot1.transform.GetChild(0).GetComponent<SpriteRenderer>().color=colors[dotColor1];
+        }
+        else if(dotNumber==2)
+        {
+            dotColor2+=2;
+            if(dotColor2>colors.Length-1)
+                dotColor2=0;
+            dot2.transform.GetChild(0).GetComponent<SpriteRenderer>().color=colors[dotColor2];
+        }
+        currentColorCheck();
+    }
+
+    void currentColorCheck()
+    {
+        if(dotColor1==dotColor2)
+            currentColor=dotColor1;
+        else if((dotColor1==4 && dotColor2==0)|| (dotColor1==0 && dotColor2==4))
+            currentColor=5; //If the combination is red and yellow set it to ORANGE
+        else
+        {
+            if(dotColor1<dotColor2)
+                currentColor=dotColor1+1;
+            else 
+            {
+                currentColor=dotColor2+1;
+            }
+        }
+        line.startColor=colors[currentColor];
+        line.endColor=colors[currentColor];
+        //DODAJ lepsu tranziciju za boje
     }
 }
