@@ -106,7 +106,7 @@ MonoBehaviour:
   - {r: 0, g: 1, b: 0.015195131, a: 1}
   - {r: 0.9052299, g: 1, b: 0, a: 1}
   - {r: 1, g: 0.63795877, b: 0, a: 1}
-  baseEnemySpeed: 0.3
+  baseEnemySpeed: 0.15
   enemyColor: 0
 --- !u!61 &2769311425043425192
 BoxCollider2D:
